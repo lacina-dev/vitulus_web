@@ -3,5 +3,5 @@
 
 It is a draft of Vitulus web UI.
 
-![plot](image_9.original.png)
-image_9.original.png
+![web UI img](image_9.original.png)
+
