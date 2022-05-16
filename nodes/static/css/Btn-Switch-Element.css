@@ -1,0 +1,113 @@
+.onoffswitch {
+  position: relative;
+  width: 90px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.onoffswitch-checkbox {
+  display: none;
+}
+
+.onoffswitch-label {
+  display: block;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid #999999;
+  border-radius: 20px;
+}
+
+.onoffswitch-inner {
+  display: block;
+  width: 200%;
+  margin-left: -100%;
+  transition: margin 0.3s ease-in 0s;
+}
+
+.onoffswitch-inner:before, .onoffswitch-inner:after {
+  display: block;
+  float: left;
+  width: 50%;
+  height: 30px;
+  padding: 0;
+  line-height: 30px;
+  font-size: 14px;
+  color: white;
+  font-family: Trebuchet, Arial, sans-serif;
+  font-weight: bold;
+  box-sizing: border-box;
+}
+
+.onoffswitch-inner:before {
+  content: "Bloco";
+  padding-left: 10px;
+  background-color: #0500ff;
+  color: #FFFFFF;
+}
+
+.onoffswitch-inner:after {
+  content: "Lista";
+  padding-right: 10px;
+  background-color: #EEEEEE;
+  color: #999999;
+  text-align: right;
+}
+
+.onoffswitch-switch {
+  display: block;
+  width: 18px;
+  margin: 6px;
+  background: #FFFFFF;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: 56px;
+  border: 2px solid #999999;
+  border-radius: 20px;
+  transition: all 0.3s ease-in 0s;
+}
+
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-inner {
+  margin-left: 0;
+}
+
+.onoffswitch-checkbox:checked + .onoffswitch-label .onoffswitch-switch {
+  right: 0px;
+}
+
+.card-box-button {
+  padding: 0px;
+  height: 19px;
+  padding-right: 5px;
+  padding-left: 5px;
+  margin-top: 3px;
+  font-size: 10px;
+}
+
+#joystick {
+  position: relative;
+}
+
+#camera-image {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.card-box-header {
+  color: rgba(118,117,117,0.91);
+  font-weight: normal;
+  font-size: 16px;
+}
+
+.card-box-hr {
+  background-color: rgba(255,243,243,0.13);
+  margin-top: 2px;
+  margin-right: 0px;
+  margin-bottom: 4px;
+  margin-left: 21px;
+}
+
+.card-box-info-label {
+}
+

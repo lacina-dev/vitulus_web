@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Vitulus UI</title>
+    <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans+Condensed:300">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu+Condensed">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu+Mono">
+    <link rel="stylesheet" href="assets/fonts/fontawesome-all.min.css">
+    <link rel="stylesheet" href="assets/fonts/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/fonts/fontawesome5-overrides.min.css">
+    <link rel="stylesheet" href="assets/css/Btn-Switch-Element.css">
+    <link rel="stylesheet" href="assets/css/Navigation-Clean.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <script type="text/javascript">
+            var ros;
+            console.log('start');
+            window.onload = function() {
+                console.log('onload');
+                robot_IP = "{{ ros_ip }}";
+                ros = new ROSLIB.Ros({url: "ws://" + robot_IP + ":9090"});
+                getOpenUPS();
+                setInterval(getOpenUPS, 1000);
+                initVelocityPublisher();
+                video = document.getElementById("camera-image");
+                video.src = "http://" + robot_IP + ":8080/stream?topic=/d435/color/image_raw&type=mjpeg&quality=40";
+                createJoystick();
+                initTeleopKeyboard();
+                getSensorState()
+                setInterval(getSensorState, 1000);
+            };
+    </script>
+</head>
+
+<body>
+    <nav class="navbar navbar-dark navbar-expand-md bg-dark shadow-sm navigation-clean">
+        <div class="container"><a class="navbar-brand" href="#">Vitulus UI</a><button data-toggle="collapse" class="navbar-toggler" data-target="#navcol-1"><span class="sr-only">Toggle navigation</span><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse"
+                id="navcol-1">
+                <ul class="nav navbar-nav ml-auto">
+                    <li class="nav-item" role="presentation"><a class="nav-link active" href="#"><i class="fa fa-desktop nav-icon"></i>Dashboard</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" href="/maps"><i class="fas fa-desktop nav-icon"></i>Maps</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" href="/navi"><i class="fas fa-map-marked-alt nav-icon"></i>Navigation</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" href="http://{{ ros_ip }}:7778/?rosbridge-websocket-url=ws://{{ ros_ip }}:9090"><i class="fas fa-map-marked-alt nav-icon"></i>WebViz</a></li>
+                    <li class="nav-item" role="presentation"><a class="nav-link" href="#"><i class="fas fa-book-reader nav-icon"></i>Docs</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid" style="margin-top: 15px;">
+        <section class="d-flex justify-content-center fluid" id="hero">
+<!--            <div class="row">-->
+<!--                {{ ros_ip }}-->
+<!--            </div>-->
+
+            <div class="row">
+                <div class="col-xl-2 text-center order-3 order-sm-3 order-md-3 order-lg-3 order-xl-1">
+                    <div class="card-box small-card-box">
+                        <div class="row card-box-small-row-header" style="border-bottom: 2px;">
+                            <div class="col text-left"><span class="card-box-header"><i class="fas fa-charging-station card-box-icon"></i>UPS</span></div>
+                            <div class="col text-right"><span class="text-warning d-inline-flex d-xl-flex justify-content-xl-end card-box-info-label" id="ups-state">OnBattery</span></div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <hr class="card-box-hr">
+                            </div>
+                        </div>
+                        <div class="row no-gutters card-box-bottom-row">
+                            <div class="col text-left"><span id="ups-volts">0.0</span><span class="units">V</span></div>
+                            <div class="col text-center"><span id="ups-amps">0.0</span><span class="units">A</span></div>
+                            <div class="col text-center"><span id="ups-wats">0</span><span class="units">W</span></div>
+                            <div class="col text-right"><span id="ups-temp">0</span><span>&nbsp;°C</span></div>
+                        </div>
+                    </div>
+                    <div class="card-box small-card-box">
+                        <div class="row card-box-small-row-header" style="border-bottom: 2px;">
+                            <div class="col text-left"><i class="fas fa-battery-full card-box-icon" id="bat-charge-ico"></i><span id="card-box-header" class="card-box-header">Battery</span></div>
+                            <div class="col text-right"><span class="text-danger d-inline-flex d-xl-flex justify-content-xl-end" id="bat-state">Discharging</span></div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <hr class="card-box-hr">
+                            </div>
+                        </div>
+                        <div class="row no-gutters card-box-bottom-row">
+                            <div class="col text-left"><span id="bat-volts">0.0</span><span class="units">V</span></div>
+                            <div class="col"><span id="bat-amps">0.0</span><span class="units">A</span></div>
+                            <div class="col text-center"><span id="bat-wats">0</span><span class="units">W</span></div>
+                            <div class="col text-right"><span id="bat-perc">0</span><span>&nbsp;%</span></div>
+                        </div>
+                    </div>
+                    <div class="card-box small-card-box">
+                        <div class="row card-box-small-row-header" style="border-bottom: 2px;">
+                            <div class="col text-left"><span id="card-box-header" class="card-box-header"><i class="fas fa-sign-out-alt card-box-icon"></i>Output&nbsp;</span></div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <hr class="card-box-hr">
+                            </div>
+                        </div>
+                        <div class="row card-box-bottom-row">
+                            <div class="col text-left"><span id="out-volts">0.0</span><span class="units">V</span></div>
+                            <div class="col"><span id="out-amps">0.0</span><span class="units">A</span></div>
+                            <div class="col text-center"><span id="out-wats">0</span><span class="units">W</span></div>
+                            <div class="col"><span></span></div>
+                        </div>
+                    </div>
+                    <div class="card-box small-card-box">
+                        <div class="row card-box-small-row-header" style="border-bottom: 2px;">
+                            <div class="col text-left"><span id="card-box-header" class="card-box-header"><i class="fas fa-truck-monster card-box-icon"></i>Motor torque</span></div>
+                            <div class="col-4 text-right"><span class="text-success d-inline-flex d-xl-flex justify-content-xl-end" id="motor_torque">On</span></div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <hr class="card-box-hr">
+                            </div>
+                        </div>
+                        <div class="row card-box-bottom-row">
+                            <div class="col text-left"><span id="ups-volts"></span></div>
+                            <div class="col text-center"><span></span></div>
+                            <div class="col text-right">
+                                <div class="btn-group" role="group"><button class="btn btn-outline-primary card-box-button" id="motor-torque-on" type="button">On</button><button class="btn btn-outline-primary card-box-button" id="motor-torque-off" type="button">Off</button></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-box small-card-box">
+                        <div class="row card-box-small-row-header" style="border-bottom: 2px;">
+                            <div class="col text-left"><span id="card-box-header" class="card-box-header"><i class="fas fa-street-view card-box-icon"></i>Lidar motor</span></div>
+                            <div class="col-4 text-right"><span class="text-danger d-inline-flex d-xl-flex justify-content-xl-end"></span></div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <hr class="card-box-hr">
+                            </div>
+                        </div>
+                        <div class="row card-box-bottom-row">
+                            <div class="col text-left"><span></span></div>
+                            <div class="col text-center"><span></span></div>
+                            <div class="col text-right"><span></span>
+                                <div class="btn-group" role="group"><button class="btn btn-secondary card-box-button" id="motor-lds-on" type="button">On</button><button class="btn btn-secondary card-box-button" id="motor-lds-off">Off</button></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-box small-card-box">
+                        <div class="row card-box-small-row-header" style="border-bottom: 2px;">
+                            <div class="col text-left"><span id="card-box-header" class="card-box-header"><i class="fas fa-tachometer-alt card-box-icon"></i>Robot max speed</span></div>
+                            <div class="col-4 text-right"><span id="r-speed-badge">0</span><span>&nbsp;m/s</span></div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <hr class="card-box-hr">
+                            </div>
+                        </div>
+                        <div class="row card-box-bottom-row">
+                            <div class="col text-left" style="/*margin-bottom: 4px;*//*margin-top: 5px;*/"><input class="shadow-sm custom-range" type="range" id="robot-speed" style="margin-bottom: 16px;margin-top: 1px;" min="10" max="100" step="1" value="30"></div>
+                        </div>
+                    </div>
+                    <div class="card-box small-card-box">
+                        <div class="row card-box-small-row-header" style="border-bottom: 2px;">
+                            <div class="col text-left"><span class="card-box-header"><i class="far fa-keyboard card-box-icon"></i>Keyboard teleop</span></div>
+                            <div class="col-4 text-right"><span id="keyboard-label">&nbsp;Off</span></div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <hr class="card-box-hr">
+                            </div>
+                        </div>
+                        <div class="row card-box-bottom-row">
+                            <div class="col d-xl-flex align-items-xl-center"><span>W - fwd, S - back, A - left, D - right</span></div>
+                            <div class="col-xl-2 text-left d-flex justify-content-xl-end" style="/*margin-bottom: 4px;*//*margin-top: 5px;*/"><input type="checkbox" id="keyboard-checkbox" style="margin-top: 8px;margin-right: 8px;margin-bottom: 11px;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col order-1 order-sm-1 order-md-1 order-lg-1 order-xl-2">
+                    <div class="row">
+                        <div class="col">
+                            <div class="card-box"><img class="img-fluid col-12" id="camera-image" src="assets/img/FakeCamImg.jpg"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-2 order-2 order-sm-2 order-md-2 order-lg-2 order-xl-3">
+                    <div class="d-flex justify-content-center align-items-center card-box" style="height: 100%;">
+                        <div style="width: 210px;height: 210px;">
+                            <div class="border-success d-flex" id="joystick" style="width: 210px;height: 210px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="row"></div>
+    </div>
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="assets/js/roslib.js"></script>
+    <script src="assets/js/easeljs.js"></script>
+    <script src="assets/js/eventemitter2.js"></script>
+    <script src="assets/js/keyboardteleop.js"></script>
+<!--    <script src="assets/js/nav.js"></script>-->
+    <script src="assets/js/nav2d.js"></script>
+    <script src="assets/js/nipplejs.js"></script>
+    <script src="assets/js/ros2d.js"></script>
+    <script src="assets/js/ros3d.js"></script>
+
+    <script src="assets/js/webui.js"></script>
+</body>
+
+</html>
